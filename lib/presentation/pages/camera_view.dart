@@ -9,7 +9,7 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> {
-  cam.CameraController? _cameraController;
+  cam.CameraController? cameraController;
 
   @override
   void initState() {
@@ -19,27 +19,26 @@ class _CameraViewState extends State<CameraView> {
 
   void _startCamera() async {
     final cameras = await cam.availableCameras();
-    final controller = cam.CameraController(
+    final cameraController = cam.CameraController(
       cameras.first,
       cam.ResolutionPreset.high,
     );
-    await controller.initialize();
 
-    setState(() {
-      _cameraController = controller;
-    });
+    await cameraController.initialize(); // risky code
+
+    setState(() {});
   }
 
   @override
   void dispose() {
-    _cameraController?.dispose();
+    cameraController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _cameraController == null
+    return cameraController == null
         ? CircularProgressIndicator()
-        : cam.CameraPreview(_cameraController!);
+        : cam.CameraPreview(cameraController!);
   }
 }

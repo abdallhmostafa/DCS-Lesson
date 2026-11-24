@@ -14,11 +14,11 @@ class TestPage extends StatefulWidget {
 class _TestPageState extends State<TestPage> {
   PermissionStatus? permissionStatus;
   bool isLoading = false;
-  late final AppLifecycleListener _appLifecycleListener;
+  late final AppLifecycleListener appLifecycleListener;
   @override
   initState() {
     super.initState();
-    _appLifecycleListener = AppLifecycleListener(
+    appLifecycleListener = AppLifecycleListener(
       onResume: () {
         log("رجعنا");
       },
@@ -28,7 +28,7 @@ class _TestPageState extends State<TestPage> {
 
   @override
   dispose() {
-    _appLifecycleListener.dispose();
+    appLifecycleListener.dispose();
     super.dispose();
   }
 
@@ -50,7 +50,7 @@ class _TestPageState extends State<TestPage> {
     setState(() {});
   }
 
-  Future<void> _openAppSettings() async {
+  Future<void> openAppSetting() async {
     isLoading = true;
 
     final result = await openAppSettings();
@@ -74,7 +74,7 @@ class _TestPageState extends State<TestPage> {
                 : Text(permissionStatus?.name ?? ' checking...'),
             if (permissionStatus == PermissionStatus.permanentlyDenied)
               ElevatedButton(
-                onPressed: _openAppSettings,
+                onPressed: openAppSetting,
                 child: const Text('Open Setting'),
               ),
 

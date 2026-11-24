@@ -9,7 +9,7 @@ class CameraPermissionPage extends StatefulWidget {
 }
 
 class _CameraPermissionPageState extends State<CameraPermissionPage> {
-  PermissionStatus? _status;
+  PermissionStatus? status;
 
   @override
   void initState() {
@@ -18,14 +18,13 @@ class _CameraPermissionPageState extends State<CameraPermissionPage> {
   }
 
   Future<void> _checkStatus() async {
-    final status = await Permission.camera.status;
-    setState(() => _status = status);
+    final result = await Permission.camera.status;
+    setState(() => status = result);
   }
 
-      
   Future<void> _requestPermission() async {
-    final status = await Permission.camera.request();
-    setState(() => _status = status);
+    final result = await Permission.camera.request();
+    setState(() => status = result);
   }
 
   @override
@@ -36,8 +35,8 @@ class _CameraPermissionPageState extends State<CameraPermissionPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_status?.name ?? 'checking...'),
-            if (_status != PermissionStatus.granted)
+            Text(status?.name ?? 'checking...'),
+            if (status != PermissionStatus.granted)
               ElevatedButton(
                 onPressed: _requestPermission,
                 child: const Text('Allow camera'),
