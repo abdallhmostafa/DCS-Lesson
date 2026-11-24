@@ -1,0 +1,95 @@
+WEEK 6 · FLUTTER
+The phone
+is a sensor
+A claimant stands beside a dented car at night. The quality check on their phone, before upload, is the cheapest accuracy gain the squad will find.
+Sat 14 to Fri 20 November 2026 · 85 minutes
+Device features and on-device AI. Permissions, the camera through the lifecycle, tamper-evident evidence, and the on-device AI ladder. The task is Wiqaya's guided capture logic, testable without ever touching a phone.
+1
+
+PERMISSIONS
+Five rules, and what happens after "no" twice
+1. Ask in context
+When the feature starts, never on a splash screen
+2. Check every time
+Users revoke permissions while the app is backgrounded
+3. Explain first
+A rationale card when the system suggests one
+4. Accept "no"
+Never link to Settings to change their mind
+5. Ask for the least
+Coarse location, shift-only, no microphone when you never record sound
+After two denials, Android stops showing the dialog entirely. Requesting again returns immediately: the app must keep working anyway.
+Android's own guidance. The "denied twice" behaviour is exactly what the hidden tests check in the permission flow.
+2
+
+PERMISSION_HANDLER
+Six statuses, one gateway interface
+granted
+proceed
+limited
+proceed
+denied
+rationale or ask
+permanentlyDenied
+settings help
+restricted
+unavailable
+permanentlyDenied only comes back from request(), never from status()
+A real trap from the package's own docs. The gateway interface hides it behind one mapping function.
+abstract class PermissionGateway: status(), request(), shouldShowRationale(), openSettings(). The W6 task's hidden tests use a fake gateway that counts how often each was called.
+3
+
+WIQAYA EVIDENCE
+In-app camera, never the gallery
+Gallery photo
+Recompressed by WhatsApp, metadata stripped, could be an old photo reused.
+In-app capture
+Original bytes, full metadata, taken now, of this car.
+Image.file(file, cacheWidth: 600)
+Decode at display size. Never hold several full-resolution images in memory at once.
+image_picker is the right tool when evidence does not matter, such as a profile picture. For a claim photo, it is the wrong tool.
+4
+
+OFF THE UI THREAD
+Pixel work belongs in an isolate
+final issues = await Isolate.run(() => checkQuality(gray));
+A nested loop over image bytes on the main isolate shows up as jank in DevTools, not a crash.
+With YUV 420 image streams, the first plane (Y) is already a greyscale image. Watch for row padding past the width.
+For live guidance ("hold steady", "too dark"), process every fifth frame or so from startImageStream, not every frame.
+5
+
+CLIMB ONLY AS HIGH AS NEEDED
+The on-device AI ladder
+1. Plain image statistics
+brightness, Laplacian blur score. No download. This W6 task.
+2. ML Kit (ready-made, on device)
+barcode, text, labelling, faces, offline
+3. Your own model, LiteRT
+a custom damage or quality model, measured on the slowest phone
+4. On-device LLMs
+Gemini Nano, high-end phones only; the Flutter package ecosystem is moving fast
+flutter_gemma was discontinued on pub.dev in October 2026 in favour of flutter_edge_ai. Pin versions and keep a server fallback at this layer.
+6
+
+KNOW THE GAPS
+ML Kit does not read Arabic text
+Text recognition v2
+Chinese, Devanagari, Japanese, Korean, Latin. Not Arabic. An Egyptian number plate or medicine name is out.
+A VIN
+Latin characters, so this one works on the device today.
+ML Kit's GenAI APIs run Gemini Nano through AICore, on supported higher-end devices only, not the budget Android phones your users own.
+Know the gaps before you promise anything to a client. Check the supported-languages page before a feature design, not after a demo.
+7
+
+THE TASK
+Wiqaya guided capture: the logic behind the camera
+The camera itself cannot run in a test, but almost everything that decides whether the claim file is good can, and that is exactly what you build and test.
+Repository
+dsc26-flt-w06
+Build
+quality_checker, capture_session, evidence, camera_permission_flow, capture_guide
+Expected time
+3 to 4 hours
+Deadline: 72 hours after this session · 5 grader runs per day
+Eight required angles, quality thresholds checked against a reference implementation on generated images, a permission flow graded by counting gateway calls, and canonical evidence JSON compared byte for byte. AI_USAGE.md's question: which part of Wiqaya's capture you would run on the phone and which on the server, and why.
+8
