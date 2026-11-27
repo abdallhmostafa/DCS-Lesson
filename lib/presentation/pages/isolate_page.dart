@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:isolate';
 import 'dart:typed_data' show Uint8List;
+import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -21,8 +22,8 @@ double averageBrightness(int pixelCount) {
 }
 
 class IsolateDemoPage extends StatefulWidget {
-  const IsolateDemoPage({super.key});
-
+  const IsolateDemoPage({this.image, super.key});
+  final XFile? image;
   @override
   State<IsolateDemoPage> createState() => _IsolateDemoPageState();
 }

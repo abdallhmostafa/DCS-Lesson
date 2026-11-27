@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart' as cam;
+import 'package:dsc_lesson/presentation/pages/isolate_page.dart';
 import 'package:flutter/material.dart';
 
 class CameraView extends StatefulWidget {
@@ -14,17 +15,18 @@ class _CameraViewState extends State<CameraView> {
   @override
   void initState() {
     super.initState();
-    _startCamera();
+    startCamera();
   }
 
-  void _startCamera() async {
+  void startCamera() async {
     final cameras = await cam.availableCameras();
-    final cameraController = cam.CameraController(
+    cameraController = cam.CameraController(
       cameras.first,
       cam.ResolutionPreset.high,
+      enableAudio: false,
     );
 
-    await cameraController.initialize(); // risky code
+    await cameraController?.initialize();
 
     setState(() {});
   }
@@ -37,8 +39,31 @@ class _CameraViewState extends State<CameraView> {
 
   @override
   Widget build(BuildContext context) {
-    return cameraController == null
-        ? CircularProgressIndicator()
-        : cam.CameraPreview(cameraController!);
+    return Scaffold(
+      appBar: AppBar(),
+      body: cameraController == null
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 20,
+              children: [
+                Expanded(flex: 3, child: cam.CameraPreview(cameraController!)),
+                Flexible(
+                  child: FilledButton(
+                    onPressed: () async {
+                      final image = await cameraController?.takePicture();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => IsolateDemoPage(image: image),
+                        ),
+                      );
+                    },
+                    child: Text("Take Picture"),
+                  ),
+                ),
+              ],
+            ),
+    );
   }
 }

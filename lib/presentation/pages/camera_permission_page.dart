@@ -1,3 +1,5 @@
+import 'package:camera/camera.dart';
+import 'package:dsc_lesson/presentation/pages/camera_view.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -27,6 +29,13 @@ class _CameraPermissionPageState extends State<CameraPermissionPage> {
     setState(() => status = result);
   }
 
+  Future<void> openAppSetting() async {
+    final result = await openAppSettings();
+    if (result) {
+      checkStatus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,6 +53,17 @@ class _CameraPermissionPageState extends State<CameraPermissionPage> {
               ElevatedButton(
                 onPressed: requestPermission,
                 child: const Text('Allow camera'),
+              ),
+
+            if (status == PermissionStatus.granted)
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CameraView()),
+                  );
+                },
+                child: const Text('Go to Camera'),
               ),
           ],
         ),
