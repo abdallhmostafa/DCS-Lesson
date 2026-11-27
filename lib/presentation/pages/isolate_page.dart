@@ -1,24 +1,30 @@
 import 'dart:async';
 import 'dart:isolate';
-import 'dart:typed_data' show Uint8List;
+import 'dart:ui' as ui;
 import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Top-level function: safe to send to an isolate.
-double averageBrightness(int pixelCount) {
-  final pixels = Uint8List(pixelCount);
-  for (var i = 0; i < pixelCount; i++) {
-    pixels[i] = (i * 31) & 255;
-  }
+Future<double> averageBrightness(XFile? image) async {
+  if (image == null) return 0.0;
+
+  final bytes = await image.readAsBytes();
+  final codec = await ui.instantiateImageCodec(bytes);
+  final frame = await codec.getNextFrame();
+  final pixelData = await frame.image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  if (pixelData == null) return 0.0;
+
+  final pixels = pixelData.buffer.asUint32List();
   var total = 0;
-  for (var pass = 0; pass < 10; pass++) {
-    total = 0;
-    for (var i = 0; i < pixelCount; i++) {
-      total += pixels[i];
-    }
+  for (final pixel in pixels) {
+    // Extract RGBA components (assuming little-endian RGBA8888)
+    final r = pixel & 0xFF;
+    final g = (pixel >> 8) & 0xFF;
+    final b = (pixel >> 16) & 0xFF;
+    // Standard luminance formula
+    total += (0.299 * r + 0.587 * g + 0.114 * b).round();
   }
-  return total / pixelCount;
+  return total / pixels.length;
 }
 
 class IsolateDemoPage extends StatefulWidget {
@@ -29,14 +35,11 @@ class IsolateDemoPage extends StatefulWidget {
 }
 
 class _IsolateDemoPageState extends State<IsolateDemoPage> {
-  // final bytes = await file.readAsBytes();
-  // final brightness = calculateBrightness(bytes);
   String _text = 'no result yet';
-  static const _pixelCount = 12000000;
 
-  void _runOnMain() {
+  Future<void> _runOnMain() async {
     final sw = Stopwatch()..start();
-    final result = averageBrightness(_pixelCount);
+    final result = await averageBrightness(widget.image);
     setState(
       () => _text =
           'main: ${result.toStringAsFixed(1)} in ${sw.elapsedMilliseconds} ms',
@@ -45,7 +48,7 @@ class _IsolateDemoPageState extends State<IsolateDemoPage> {
 
   Future<void> _runInIsolate() async {
     final sw = Stopwatch()..start();
-    final result = await Isolate.run(() => averageBrightness(_pixelCount));
+    final result = await Isolate.run(() => averageBrightness(widget.image));
     setState(
       () => _text =
           'isolate: ${result.toStringAsFixed(1)} in ${sw.elapsedMilliseconds} ms',
