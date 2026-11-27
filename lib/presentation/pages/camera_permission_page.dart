@@ -14,15 +14,15 @@ class _CameraPermissionPageState extends State<CameraPermissionPage> {
   @override
   void initState() {
     super.initState();
-    _checkStatus();
+    checkStatus();
   }
 
-  Future<void> _checkStatus() async {
+  Future<void> checkStatus() async {
     final result = await Permission.camera.status;
     setState(() => status = result);
   }
 
-  Future<void> _requestPermission() async {
+  Future<void> requestPermission() async {
     final result = await Permission.camera.request();
     setState(() => status = result);
   }
@@ -34,11 +34,15 @@ class _CameraPermissionPageState extends State<CameraPermissionPage> {
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          spacing: 20,
           children: [
-            Text(status?.name ?? 'checking...'),
+            Text(
+              status?.name ?? 'Checking...',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             if (status != PermissionStatus.granted)
               ElevatedButton(
-                onPressed: _requestPermission,
+                onPressed: requestPermission,
                 child: const Text('Allow camera'),
               ),
           ],
