@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:typed_data' show Uint8List;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// Top-level function: safe to send to an isolate.
+/// Top-level function: safe to send to an isolate.
 double averageBrightness(int pixelCount) {
   final pixels = Uint8List(pixelCount);
   for (var i = 0; i < pixelCount; i++) {
@@ -26,10 +28,10 @@ class IsolateDemoPage extends StatefulWidget {
 }
 
 class _IsolateDemoPageState extends State<IsolateDemoPage> {
+  // final bytes = await file.readAsBytes();
+  // final brightness = calculateBrightness(bytes);
   String _text = 'no result yet';
-  // static const _pixelCount = 12000000;
-  static const _pixelCount =    120000000;
-
+  static const _pixelCount = 12000000;
 
   void _runOnMain() {
     final sw = Stopwatch()..start();
