@@ -52,6 +52,7 @@ class _CameraViewState extends State<CameraView> {
                   child: FilledButton(
                     onPressed: () async {
                       final image = await cameraController?.takePicture();
+                      if (image == null) return;
                       Navigator.push(
                         context,
                         MaterialPageRoute(
